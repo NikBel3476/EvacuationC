@@ -24,7 +24,7 @@ double geom_tools_length_side(const point_t *const p1, const point_t *const p2)
 double geom_tools_area_polygon(const polygon_t *const polygon)
 {
     // https://ru.wikipedia.org/wiki/Формула_площади_Гаусса
-    size_t n = polygon->numofpoints;
+    size_t n = polygon->numofpoints - 2;
     double sum = polygon->points[n].x * polygon->points[0].y - polygon->points[0].x * polygon->points[n].y;
     for (size_t i = 0; i < n; i++) {
       sum += polygon->points[i].x * polygon->points[i+1].y - polygon->points[i+1].x * polygon->points[i].y;
