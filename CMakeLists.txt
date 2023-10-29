@@ -54,22 +54,18 @@ FetchContent_MakeAvailable(c-logger json-c)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        ./thirdparty/triangle
         ./thirdparty/arraylist
     )
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         logger_static
-        triangle
         pthread
         arraylist
         json-c-static
         m
 )
 
-
-add_subdirectory(thirdparty/triangle)
 add_subdirectory(thirdparty/arraylist)
 
 ### Test

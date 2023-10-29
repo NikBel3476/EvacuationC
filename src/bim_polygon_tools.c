@@ -14,7 +14,6 @@
  */
 
 #include "bim_polygon_tools.h"
-#include "triangle.h"
 
 double geom_tools_length_side(const point_t *const p1, const point_t *const p2)
 {
