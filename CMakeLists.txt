@@ -69,7 +69,7 @@ target_link_libraries(${PROJECT_NAME}
 add_subdirectory(thirdparty/arraylist)
 
 ### Test
-if(build_tests)
+#if(build_tests AND ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     enable_testing()
-    add_subdirectory(test)
-endif()
+    add_subdirectory(tests)
+#endif()
