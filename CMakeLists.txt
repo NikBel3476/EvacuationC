@@ -11,6 +11,7 @@ set(CMAKE_PROJECT_INCLUDE_BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Policy.cmake)
 
 include(ExternalProject)
 include(FetchContent)
+include(CTest)
 
 option(build_tests "Build all of own tests" OFF)
 
