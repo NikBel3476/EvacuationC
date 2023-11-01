@@ -45,10 +45,6 @@ jobs:
       - uses: ssciwr/doxygen-install@v1
       - uses: ts-graphviz/setup-graphviz@v1
 
-      - name: Set up MinGW
-        uses: egor-tensin/setup-mingw@v2
-        if: contains(matrix.os, 'windows')
-
       - name: Set reusable strings
         # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
         id: strings
