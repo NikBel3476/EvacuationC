@@ -121,9 +121,109 @@ void test_complex_figure_with_right_angles_polygon_area() {
     assert(geom_tools_area_polygon(&polygon) == 15.445482030030689202249050140380859375);
 }
 
+void test_point_inside_triangle() {
+    polygon_t triangle_polygon = triangle_polygon_with_area_0_5();
+    point_t points[] = {
+        { 0.0, 0.0 },
+        { 0.5, 0.0 },
+        { 1.0, 0.0 },
+        { 0.5, 0.5 },
+        { 0.0, 1.0 },
+        { 0.0, 0.5 },
+        { 0.0, 0.0 }
+    };
+    size_t number_of_points = 7;
+
+    for (size_t i = 0; i < number_of_points; i++) {
+        assert(geom_tools_is_point_in_polygon(&points[i], &triangle_polygon));
+    }
+}
+
+void test_point_outside_triangle() {
+    polygon_t triangle_polygon = triangle_polygon_with_area_0_5();
+    point_t points[] = {
+        {-1.0, -1.0},
+        {0.5, -1.0},
+        {1.5, -0.5},
+        {1.0, 1.0},
+        {-0.5, 1.5},
+        {-0.5, 0.5}
+    };
+    size_t number_of_points = 6;
+
+    for (size_t i = 0; i < number_of_points; i++) {
+        assert(!geom_tools_is_point_in_polygon(&points[i], &triangle_polygon));
+    }
+}
+
+void test_point_inside_square() {
+    polygon_t polygon = square_polygon();
+    point_t points[] = {
+        {0.0, 0.0},
+        {0.5, 0.0},
+        {1.0, 0.0},
+        {1.0, 0.5},
+        {1.0, 1.0},
+        {0.5, 1.0},
+        {0.0, 1.0},
+        {0.0, 0.5},
+        {0.5, 0.5}
+    };
+    size_t number_of_points = 9;
+
+    for (size_t i = 0; i < number_of_points; i++) {
+        assert(geom_tools_is_point_in_polygon(&points[i], &polygon));
+    }
+}
+
+void test_point_outside_square() {
+    polygon_t polygon = square_polygon();
+    point_t points[] = {
+        {-0.5, -0.5},
+        {0.5, -0.5},
+        {1.5, -0.5},
+        {1.5, 0.5},
+        {1.5, 1.5},
+        {0.5, 1.5},
+        {-0.5, 1.5},
+        {-0.5, 0.5}
+    };
+    size_t number_of_points = 8;
+
+    for (size_t i = 0; i < number_of_points; i++) {
+        assert(!geom_tools_is_point_in_polygon(&points[i], &polygon));
+    }
+}
+
+void test_polygon_intersection() {
+    polygon_t polygon = complex_figure_with_right_angles_polygon();
+    point_t points_outside[] = {
+        {31.87872886657715, -38.24702072143555},
+        {31.87872886657715, -37.34701919555664}
+    };
+    size_t number_of_points_inside = 2;
+    point_t points_inside[] = {
+        {32.07872772216797, -38.24702072143555},
+        {32.07872772216797, -37.34701919555664}
+    };
+    size_t number_of_points_outside = 2;
+
+    for (size_t i = 0; i < number_of_points_inside; i++) {
+        assert(geom_tools_is_point_in_polygon(&points_inside[i], &polygon));
+    }
+    for (size_t i = 0; i < number_of_points_outside; i++) {
+        assert(!geom_tools_is_point_in_polygon(&points_outside[i], &polygon));
+    }
+}
+
 int main() {
     test_triangle_area();
     test_parallelogram_polygon_area();
     test_complex_figure_with_right_angles_polygon_area();
+    test_point_inside_triangle();
+    test_point_outside_triangle();
+    test_point_inside_square();
+    test_point_outside_square();
+    test_polygon_intersection();
     return 0;
 }
