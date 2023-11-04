@@ -9,9 +9,10 @@ bim_zone_t receiving_zone_default() {
     uuid_t uuid = {.x = "00000000-0000-0000-0000-000000000000"};
     uuid_t *outputs = (uuid_t *) calloc(1, sizeof(uuid_t));
     strcpy((char *) outputs[0].x, uuid.x);
+    point_t points[] = {};
     polygon_t polygon = {
             .numofpoints = 0,
-            .points = {}
+            .points = points
     };
     bim_zone_t zone = {
             .id = 1,
@@ -28,7 +29,7 @@ bim_zone_t receiving_zone_default() {
             .sign = ROOM,
             .size_z = 2.0,
             .polygon = &polygon,
-            .potential = 1.0,
+            .potential = 1.0
     };
     return zone;
 }
@@ -37,9 +38,10 @@ bim_zone_t transmitting_zone_default() {
     uuid_t uuid = {.x = "00000000-0000-0000-0000-000000000000"};
     uuid_t *outputs = (uuid_t *) calloc(1, sizeof(uuid_t));
     strcpy((char *) outputs[0].x, uuid.x);
+    point_t points[] = {};
     polygon_t polygon = {
             .numofpoints = 0,
-            .points = {}
+            .points = points
     };
     bim_zone_t zone = {
             .id = 2,
@@ -65,9 +67,10 @@ bim_transit_t transit_default() {
     uuid_t uuid = {.x = "00000000-0000-0000-0000-000000000000"};
     uuid_t *outputs = (uuid_t *) calloc(1, sizeof(uuid_t));
     strcpy((char *) outputs[0].x, uuid.x);
+    point_t points[] = {};
     polygon_t polygon = {
             .numofpoints = 0,
-            .points = {}
+            .points = points
     };
     bim_transit_t transition = {
             .uuid = uuid,
