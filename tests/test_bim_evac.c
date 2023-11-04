@@ -134,9 +134,10 @@ void test_part_people_flow() {
 }
 
 void test_part_people_flow_outside() {
+    point_t points[] = {};
     polygon_t receiving_zone_polygon = {
             .numofpoints = 0,
-            .points = {}
+            .points = points
     };
     uuid_t *receiving_zone_outputs = (uuid_t *) calloc(2, sizeof(uuid_t));
     strcpy((char *) receiving_zone_outputs[0].x, "f2590703-5d39-43c7-8241-5e7dd246e3d4");
