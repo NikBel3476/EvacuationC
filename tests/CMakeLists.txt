@@ -1,6 +1,7 @@
 set(tests
-    test_bim_object
-    test_bim_polygon_tools
+    test_bim_object.c
+    test_bim_polygon_tools.c
+    test_bim_evac.c
 )
 
 set(EvacuationC_sources
@@ -36,7 +37,7 @@ include_directories(
 )
 
 foreach(test IN LISTS tests)
-    add_executable(${test} ${test}.c)
+    add_executable(${test} ${test})
     target_compile_definitions(${test}
         PRIVATE
             ROOT_PATH="${CMAKE_SOURCE_DIR}/res"
