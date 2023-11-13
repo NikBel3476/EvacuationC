@@ -26,7 +26,9 @@ if (NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE Release)
 endif()
 
-add_executable(${PROJECT_NAME}
+set(PROJECT_LIB_STATIC ${PROJECT_NAME}_static)
+set(PROJECT_LIB_SHARED ${PROJECT_NAME}_shared)
+set(SOURCES
     src/bim_tools.c         src/bim_tools.h
     src/bim_graph.c         src/bim_graph.h
     src/bim_evac.c          src/bim_evac.h
@@ -34,10 +36,22 @@ add_executable(${PROJECT_NAME}
     src/bim_configure.c     src/bim_configure.h
     src/bim_json_object.c   src/bim_json_object.h
     src/bim_cli.c           src/bim_cli.h
-                            src/bim_uuid.h
+    src/bim_uuid.h
     src/bim_output.c        src/bim_output.h
+)
+
+add_library(${PROJECT_LIB_STATIC}
+    STATIC
+        ${SOURCES}
+)
+add_library(${PROJECT_LIB_SHARED}
+    SHARED
+        ${SOURCES}
+)
+
+add_executable(${PROJECT_NAME}
     src/main.c
-    )
+)
 
 FetchContent_Declare(
     c-logger
@@ -53,18 +67,37 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(c-logger json-c)
 
-target_include_directories(${PROJECT_NAME}
+target_include_directories(${PROJECT_LIB_STATIC}
     PUBLIC
         ./thirdparty/arraylist
-    )
+)
 
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
+target_include_directories(${PROJECT_LIB_SHARED}
+    PUBLIC
+        ./thirdparty/arraylist
+)
+
+target_link_libraries(${PROJECT_LIB_STATIC}
+    PUBLIC
         logger_static
         pthread
         arraylist
         json-c-static
         m
+)
+
+target_link_libraries(${PROJECT_LIB_SHARED}
+    PUBLIC
+        logger_static
+        pthread
+        arraylist
+        json-c-static
+        m
+)
+
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+        ${PROJECT_LIB_STATIC}
 )
 
 add_subdirectory(thirdparty/arraylist)
