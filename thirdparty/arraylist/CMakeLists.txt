@@ -2,6 +2,12 @@ add_library(arraylist STATIC
     arraylist.c arraylist.h
     )
 
+if (MSVC)
+    target_compile_options(arraylist
+        PRIVATE
+            /Wall
+    )
+else()
 target_compile_options(arraylist
     PRIVATE
         -Wno-unused-variable
@@ -10,3 +16,4 @@ target_compile_options(arraylist
         -Wunused-parameter
         -Wno-unused-parameter
      )
+endif()

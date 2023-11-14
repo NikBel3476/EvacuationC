@@ -36,6 +36,11 @@ bim_level_element_t, и функции для работы с моделью з�
 
 #define OUTSIDE_IDX(x) (x->zones->length - 1)
 
+#ifdef _MSC_VER
+#include <float.h>
+#define __FLT_MAX__ FLT_MAX
+#endif
+
 /// Структура, расширяющая элемент DOOR_*
 typedef struct
 {

@@ -17,13 +17,14 @@ option(build_tests "Build all of own tests" OFF)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
-set(CMAKE_C_FLAGS "-std=gnu11 -W -Wall -Wextra -Wparentheses -Wshadow -funsigned-char")
-if (${CMAKE_COMPILER_IS_GNUCC})
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+if (MSVC)
+    set(CMAKE_C_FLAGS "/Wall")
+else()
+    set(CMAKE_C_FLAGS "-std=gnu11 -W -Wall -Wextra -Wparentheses -Wshadow -funsigned-char")
+    set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+    #set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=pointer-subtract -fsanitize=shift")
+    set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
 endif()
-set(CMAKE_C_FLAGS_DEBUG "-g -O0")
-#set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=pointer-subtract -fsanitize=shift")
-set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
 
 if (NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE Release)
@@ -31,29 +32,25 @@ endif()
 
 set(PROJECT_LIB_STATIC ${PROJECT_NAME}_static)
 set(PROJECT_LIB_SHARED ${PROJECT_NAME}_shared)
-set(SOURCES
+set(SOURCES_LIB
     src/bim_tools.c         src/bim_tools.h
     src/bim_graph.c         src/bim_graph.h
     src/bim_evac.c          src/bim_evac.h
     src/bim_polygon_tools.c src/bim_polygon_tools.h
     src/bim_configure.c     src/bim_configure.h
     src/bim_json_object.c   src/bim_json_object.h
-    src/bim_cli.c           src/bim_cli.h
     src/bim_uuid.h
     src/bim_output.c        src/bim_output.h
 )
 
 add_library(${PROJECT_LIB_STATIC}
     STATIC
-        ${SOURCES}
-)
-add_library(${PROJECT_LIB_SHARED}
-    SHARED
-        ${SOURCES}
+        ${SOURCES_LIB}
 )
 
-add_executable(${PROJECT_NAME}
-    src/main.c
+add_library(${PROJECT_LIB_SHARED}
+    SHARED
+        ${SOURCES_LIB}
 )
 
 FetchContent_Declare(
@@ -70,6 +67,17 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(c-logger json-c)
 
+if (SKBUILD)
+    find_package(PythonExtensions REQUIRED)
+    find_package(Cython REQUIRED)
+    add_subdirectory(EvacuationC)
+else()
+    add_executable(${PROJECT_NAME}
+            src/main.c
+            src/bim_cli.c src/bim_cli.h
+    )
+endif()
+
 target_include_directories(${PROJECT_LIB_STATIC}
     PUBLIC
         ./thirdparty/arraylist
@@ -83,19 +91,15 @@ target_include_directories(${PROJECT_LIB_SHARED}
 target_link_libraries(${PROJECT_LIB_STATIC}
     PUBLIC
         logger_static
-        pthread
         arraylist
         json-c-static
-        m
 )
 
 target_link_libraries(${PROJECT_LIB_SHARED}
     PUBLIC
         logger_static
-        pthread
         arraylist
         json-c-static
-        m
 )
 
 target_link_libraries(${PROJECT_NAME}
