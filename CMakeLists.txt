@@ -20,7 +20,7 @@ if (MSVC)
     set(CMAKE_C_FLAGS "/Wall")
     set(CMAKE_C_FLAGS_RELEASE "/O2")
 else()
-    set(CMAKE_C_FLAGS "-std=gnu11 -W -Wall -Wextra -Wparentheses -Wshadow -funsigned-char -fPIC")
+    set(CMAKE_C_FLAGS "-std=gnu11 -W -Wall -Wextra -Wparentheses -Wshadow -funsigned-char")
     set(CMAKE_C_FLAGS_DEBUG "-g -O0")
     #set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=pointer-subtract -fsanitize=shift")
     set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
@@ -56,7 +56,7 @@ add_library(${PROJECT_LIB_SHARED}
 FetchContent_Declare(
     c-logger
     GIT_REPOSITORY https://github.com/NikBel3476/c-logger.git
-    GIT_TAG f02747287296b5a0da1cc2b9d7f4e98a3be444d9 # upstream/master
+    GIT_TAG 0a2f68ad4a0585cefa58fcafd9ac1716b8c74674 # upstream/master
 )
 
 FetchContent_Declare(
