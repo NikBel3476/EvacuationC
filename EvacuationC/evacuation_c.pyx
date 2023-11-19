@@ -1,7 +1,3 @@
-# distutils: sources = src/bim_tools.c
-# distutils: include_dirs = src/
-
-
 cimport cevacuation_c
 
 

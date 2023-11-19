@@ -20,7 +20,7 @@ set(CMAKE_VERBOSE_MAKEFILE TRUE)
 if (MSVC)
     set(CMAKE_C_FLAGS "/Wall")
 else()
-    set(CMAKE_C_FLAGS "-std=gnu11 -W -Wall -Wextra -Wparentheses -Wshadow -funsigned-char")
+    set(CMAKE_C_FLAGS "-std=gnu11 -W -Wall -Wextra -Wparentheses -Wshadow -funsigned-char -fPIC")
     set(CMAKE_C_FLAGS_DEBUG "-g -O0")
     #set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=pointer-subtract -fsanitize=shift")
     set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
@@ -67,16 +67,21 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(c-logger json-c)
 
-if (SKBUILD)
-    find_package(PythonExtensions REQUIRED)
-    find_package(Cython REQUIRED)
-    add_subdirectory(EvacuationC)
-else()
-    add_executable(${PROJECT_NAME}
-            src/main.c
-            src/bim_cli.c src/bim_cli.h
-    )
-endif()
+#if (SKBUILD)
+#    find_package(PythonExtensions REQUIRED)
+#    find_package(Cython REQUIRED)
+##    add_subdirectory(EvacuationC)
+#else()
+#    add_executable(${PROJECT_NAME}
+#            src/main.c
+#            src/bim_cli.c src/bim_cli.h
+#    )
+#
+#    target_link_libraries(${PROJECT_NAME}
+#            PRIVATE
+#            ${PROJECT_LIB_STATIC}
+#    )
+#endif()
 
 target_include_directories(${PROJECT_LIB_STATIC}
     PUBLIC
@@ -100,11 +105,6 @@ target_link_libraries(${PROJECT_LIB_SHARED}
         logger_static
         arraylist
         json-c-static
-)
-
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-        ${PROJECT_LIB_STATIC}
 )
 
 add_subdirectory(thirdparty/arraylist)
