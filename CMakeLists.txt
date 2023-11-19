@@ -9,7 +9,6 @@ project(EvacuationC
 
 set(CMAKE_PROJECT_INCLUDE_BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Policy.cmake)
 
-#include(ExternalProject)
 include(FetchContent)
 include(CTest)
 
@@ -17,18 +16,18 @@ option(build_tests "Build all of own tests" OFF)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
-#if (MSVC)
-#    set(CMAKE_C_FLAGS "/Wall")
-#else()
-#    set(CMAKE_C_FLAGS "-std=gnu11 -W -Wall -Wextra -Wparentheses -Wshadow -funsigned-char -fPIC")
-#    set(CMAKE_C_FLAGS_DEBUG "-g -O0")
-#    #set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=pointer-subtract -fsanitize=shift")
-#    set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
-#endif()
+if (MSVC)
+    set(CMAKE_C_FLAGS "/Wall")
+else()
+    set(CMAKE_C_FLAGS "-std=gnu11 -W -Wall -Wextra -Wparentheses -Wshadow -funsigned-char -fPIC")
+    set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+    #set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=pointer-subtract -fsanitize=shift")
+    set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
+endif()
 
-#if (NOT CMAKE_BUILD_TYPE)
-#   set(CMAKE_BUILD_TYPE Release)
-#endif()
+if (NOT CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE Release)
+endif()
 
 set(PROJECT_LIB_STATIC ${PROJECT_NAME}_static)
 set(PROJECT_LIB_SHARED ${PROJECT_NAME}_shared)
@@ -79,6 +78,12 @@ else()
             PRIVATE
             ${PROJECT_LIB_STATIC}
     )
+
+    ### Test
+    #if(build_tests AND ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+        enable_testing()
+        add_subdirectory(tests)
+    #endif()
 endif()
 
 target_include_directories(${PROJECT_LIB_STATIC}
@@ -106,9 +111,3 @@ target_link_libraries(${PROJECT_LIB_SHARED}
 )
 
 add_subdirectory(thirdparty/arraylist)
-
-### Test
-#if(build_tests AND ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-#    enable_testing()
-#    add_subdirectory(tests)
-#endif()
