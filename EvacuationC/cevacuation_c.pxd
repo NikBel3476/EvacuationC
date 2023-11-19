@@ -1,4 +1,4 @@
-cdef extern from "../src/bim_tools.h":
+cdef extern from "bim_tools.h":
     ctypedef struct bim_transit_t:
         pass
 
