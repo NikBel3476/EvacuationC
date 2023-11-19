@@ -18,6 +18,7 @@ set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 if (MSVC)
     set(CMAKE_C_FLAGS "/Wall")
+    set(CMAKE_C_FLAGS_RELEASE "/O2")
 else()
     set(CMAKE_C_FLAGS "-std=gnu11 -W -Wall -Wextra -Wparentheses -Wshadow -funsigned-char -fPIC")
     set(CMAKE_C_FLAGS_DEBUG "-g -O0")
@@ -105,9 +106,9 @@ target_link_libraries(${PROJECT_LIB_STATIC}
 
 target_link_libraries(${PROJECT_LIB_SHARED}
     PUBLIC
-        logger_static
+        logger
         arraylist
-        json-c-static
+        json-c
 )
 
 add_subdirectory(thirdparty/arraylist)
