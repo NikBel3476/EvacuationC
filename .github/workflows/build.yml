@@ -77,7 +77,7 @@ jobs:
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
       - name: Build python package
-        run: pip install .[all]
+        run: pip install .
 
       - name: Run tests
         run: ctest --test-dir ${{ steps.strings.outputs.build-output-dir }} --output-on-failure --no-tests=error
