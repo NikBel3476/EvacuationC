@@ -15,6 +15,7 @@ include(CTest)
 option(build_tests "Build all of own tests" OFF)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 if (MSVC)
     set(CMAKE_C_FLAGS "/Wall")
