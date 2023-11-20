@@ -42,6 +42,7 @@ set(SOURCES_LIB
     src/bim_json_object.c   src/bim_json_object.h
     src/bim_uuid.h
     src/bim_output.c        src/bim_output.h
+    src/bim_modeling.c      src/bim_modeling.h
 )
 
 add_library(${PROJECT_LIB_STATIC}
