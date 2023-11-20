@@ -2,7 +2,7 @@
 
 void applying_scenario_bim_params(bim_t* bim, const bim_cfg_scenario_t* cfg_scenario);
 
-void run_modeling(
+modeling_result_t run_modeling(
         const char *path_to_file,
         const char *path_to_json,
         const bim_cfg_scenario_t *bim_cfg_scenario
@@ -99,8 +99,11 @@ void run_modeling(
         if (num_of_people <= remainder) break;
     }
 
-    LOG_INFO("Длительность эвакуации: %.2f с. (%.2f мин.)", evac_get_time_s(), evac_get_time_m());
-    LOG_INFO("Количество человек: в здании - %.2f (в безопасной зоне - %.2f) чел.", bim_tools_get_numofpeople(bim), ((bim_zone_t*)zones->data[OUTSIDE_IDX(bim)])->numofpeople);
+    double time_in_s = evac_get_time_s();
+    double num_of_evacuated_people = bim_tools_get_numofpeople(bim);
+    double num_of_people_in_safety_zone = ((bim_zone_t*)zones->data[OUTSIDE_IDX(bim)])->numofpeople;
+    LOG_INFO("Длительность эвакуации: %.2f с. (%.2f мин.)", time_in_s, evac_get_time_m());
+    LOG_INFO("Количество человек: в здании - %.2f (в безопасной зоне - %.2f) чел.", num_of_evacuated_people, num_of_people_in_safety_zone);
     LOG_INFO("---------------------------------------");
 
     {
@@ -118,6 +121,14 @@ void run_modeling(
 //        free(output_detail);
     bim_graph_free(graph);
     bim_tools_free(bim);
+
+    modeling_result_t modeling_result = {
+        .time_in_s = time_in_s,
+        .num_of_evacuated_people = num_of_evacuated_people,
+        .num_of_people_in_safety_zone = num_of_people_in_safety_zone
+    };
+
+    return modeling_result;
 }
 
 void applying_scenario_bim_params(bim_t* bim, const bim_cfg_scenario_t* cfg_scenario)
