@@ -27,13 +27,20 @@
 #include "bim_output.h"
 
 void applying_scenario_bim_params(bim_t* bim, const bim_cfg_scenario_t* cfg_scenario);
+void run_modeling_by_cfg(const cli_params_t *cli_params);
+void run_modeling(const char *path_to_file, const char *path_to_json, const bim_cfg_scenario_t *bim_cfg_scenario);
 
 int main (int argc, char** argv)
 {
 #ifdef _WIN32
     system("chcp 65001");
 #endif
-    const cli_params_t       *cli_params       = read_cl_args(argc, argv);
+    const cli_params_t *cli_params = read_cl_args(argc, argv);
+    run_modeling_by_cfg(cli_params);
+    return 0;
+}
+
+void run_modeling_by_cfg(const cli_params_t *cli_params) {
     const bim_cfg_scenario_t *bim_cfg_scenario = bim_cfg_load(cli_params->scenario_file);
 
     // Настройки с-logger
@@ -41,118 +48,130 @@ int main (int argc, char** argv)
 
     for (size_t bim_idx = 0; bim_idx < bim_cfg_scenario->num_of_bim_jsons; bim_idx++)
     {
-        char *filename = bim_basename((char *)bim_cfg_scenario->bim_jsons[bim_idx].x);
-        LOG_INFO("The file name of the used bim `%s.json`", filename);
-
-        // Чтение файла и разворачивание его в структуру
-        LOG_TRACE("Use module `bim_json_object`. Read the file of bim and create a programming structure");
-        const bim_json_object_t * bim_json = bim_json_new(bim_cfg_scenario->bim_jsons[bim_idx].x);
-        {
-            LOG_TRACE("Name of building: %s", bim_json->name);
-
-            LOG_TRACE("##Address info");
-            LOG_TRACE("City: %s", bim_json->address->city);
-            LOG_TRACE("Street: %s", bim_json->address->street_address);
-            LOG_TRACE("Additional: %s", bim_json->address->add_info);
-        }
-
-        bim_t *bim = bim_tools_new(bim_json);
-        {
-            LOG_TRACE("##Levels info");
-            LOG_TRACE("Num of levels: %i", bim->numoflevels);
-
-            for (size_t i = 0; i < bim->numoflevels; ++i)
-            {
-                LOG_TRACE("##Level info");
-                LOG_TRACE("Level name: %s", bim->levels[i].name);
-                LOG_TRACE("Num of zones on the level: %i", bim->levels[i].numofzones);
-                LOG_TRACE("Num of transits on the level: %i", bim->levels[i].numoftransits);
-                LOG_TRACE("Level height over zero mark: %d", bim->levels[i].z_level);
-
-                LOG_TRACE("##Zones info");
-                for (size_t j = 0; j < bim->levels[i].numofzones; ++j)
-                {
-                    LOG_TRACE("Id: %zu", bim->levels[i].zones[j].id);
-                    LOG_TRACE("Element name: %s | UUID: %s", bim->levels[i].zones[j].name, bim->levels[i].zones[j].uuid.x);
-                    LOG_TRACE("Num of outputs: %i", bim->levels[i].zones[j].numofoutputs);
-                    LOG_TRACE("Area: %f", bim->levels[i].zones[j].area);
-                }
-
-                LOG_TRACE("##Transits info");
-                for (size_t j = 0; j < bim->levels[i].numoftransits; ++j)
-                {
-                    LOG_TRACE("Id: %zu", bim->levels[i].transits[j].id);
-                    LOG_TRACE("Element name: %s | UUID: %s", bim->levels[i].transits[j].name, bim->levels[i].transits[j].uuid.x);
-                    LOG_TRACE("Num of outputs: %i", bim->levels[i].transits[j].numofoutputs);
-                    LOG_TRACE("Width: %f", bim->levels[i].transits[j].width);
-                }
-            }
-
-            LOG_TRACE("Outside id: %u", ((bim_zone_t *)bim->zones->data[bim->zones->length-1])->id);
-            LOG_TRACE("Outside uuid: %s", ((bim_zone_t *)bim->zones->data[bim->zones->length-1])->uuid.x);
-        }
-
-        applying_scenario_bim_params(bim, bim_cfg_scenario);
-
-        // Files with results
-        char *output_detail = bim_create_file_name(filename, OUTPUT_DETAIL_FILE, OUTPUT_SUFFIX);
-        char *output_short  = bim_create_file_name(filename, OUTPUT_SHORT_FILE,  OUTPUT_SUFFIX);
-        free(filename);
-
-        FILE *fp_detail = fopen(output_detail, "w+");
-        LOG_TRACE("Created file for detailed information about flows pedestrian: %s", output_detail);
-
-        bim_output_head(bim, fp_detail);
-        bim_output_body(bim, 0, fp_detail);
-
-        bim_graph_t *graph = bim_graph_new(bim);
-        bim_graph_print(graph);
-
-        ArrayList *transits = bim->transits;
-        ArrayList *zones    = bim->zones;
-        evac_def_modeling_step(bim);
-        evac_time_reset();
-
-        double remainder = 0.0; // Количество человек, которое может остаться в зд. для остановки цикла
-        while(true)
-        {
-            evac_moving_step(graph, zones, transits);
-            evac_time_inc();
-            bim_output_body(bim, evac_get_time_m(), fp_detail);
-
-            double num_of_people = 0;
-            for (size_t i = 0; i < zones->length; i++)
-            {
-                bim_zone_t *zone = zones->data[i];
-                if (zone->is_visited)
-                {
-                   num_of_people += zone->numofpeople;
-                }
-            }
-
-            if (num_of_people <= remainder) break;
-        }
-
-        LOG_INFO("Длительность эвакуации: %.2f с. (%.2f мин.)", evac_get_time_s(), evac_get_time_m());
-        LOG_INFO("Количество человек: в здании - %.2f (в безопасной зоне - %.2f) чел.", bim_tools_get_numofpeople(bim), ((bim_zone_t*)zones->data[OUTSIDE_IDX(bim)])->numofpeople);
-        LOG_INFO("---------------------------------------");
-
-        {
-            FILE *fp_short = fopen(output_short, "w+");
-            LOG_TRACE("Created file for shorted information about evacuation: %s", output_short);
-            LOG_TRACE("[Total] Time - %.2f, Number of people in the build - %.2f, Number of people in the outside - %.2f", evac_get_time_m(), bim_tools_get_numofpeople(bim), ((bim_zone_t*)zones->data[OUTSIDE_IDX(bim)])->numofpeople);
-
-            fprintf(fp_short, "%.2f,%.2f,%.2f", evac_get_time_m(), bim_tools_get_numofpeople(bim), ((bim_zone_t*)zones->data[OUTSIDE_IDX(bim)])->numofpeople);
-            fflush(fp_short);
-            fclose(fp_short);
-//            free(output_short);
-        }
-
-        fclose(fp_detail);
-//        free(output_detail);
-        bim_graph_free(graph);
-        bim_tools_free(bim);
+        run_modeling(
+            (char *)bim_cfg_scenario->bim_jsons[bim_idx].x,
+            bim_cfg_scenario->bim_jsons[bim_idx].x,
+            bim_cfg_scenario
+        );
     }
+}
+
+void run_modeling(
+    const char *path_to_file,
+    const char *path_to_json,
+    const bim_cfg_scenario_t *bim_cfg_scenario
+) {
+    char *filename = bim_basename(filename);
+    LOG_INFO("The file name of the used bim `%s.json`", filename);
+
+    // Чтение файла и разворачивание его в структуру
+    LOG_TRACE("Use module `bim_json_object`. Read the file of bim and create a programming structure");
+    const bim_json_object_t * bim_json = bim_json_new(path_to_json);
+    {
+        LOG_TRACE("Name of building: %s", bim_json->name);
+
+        LOG_TRACE("##Address info");
+        LOG_TRACE("City: %s", bim_json->address->city);
+        LOG_TRACE("Street: %s", bim_json->address->street_address);
+        LOG_TRACE("Additional: %s", bim_json->address->add_info);
+    }
+
+    bim_t *bim = bim_tools_new(bim_json);
+    {
+        LOG_TRACE("##Levels info");
+        LOG_TRACE("Num of levels: %i", bim->numoflevels);
+
+        for (size_t i = 0; i < bim->numoflevels; ++i)
+        {
+            LOG_TRACE("##Level info");
+            LOG_TRACE("Level name: %s", bim->levels[i].name);
+            LOG_TRACE("Num of zones on the level: %i", bim->levels[i].numofzones);
+            LOG_TRACE("Num of transits on the level: %i", bim->levels[i].numoftransits);
+            LOG_TRACE("Level height over zero mark: %d", bim->levels[i].z_level);
+
+            LOG_TRACE("##Zones info");
+            for (size_t j = 0; j < bim->levels[i].numofzones; ++j)
+            {
+                LOG_TRACE("Id: %zu", bim->levels[i].zones[j].id);
+                LOG_TRACE("Element name: %s | UUID: %s", bim->levels[i].zones[j].name, bim->levels[i].zones[j].uuid.x);
+                LOG_TRACE("Num of outputs: %i", bim->levels[i].zones[j].numofoutputs);
+                LOG_TRACE("Area: %f", bim->levels[i].zones[j].area);
+            }
+
+            LOG_TRACE("##Transits info");
+            for (size_t j = 0; j < bim->levels[i].numoftransits; ++j)
+            {
+                LOG_TRACE("Id: %zu", bim->levels[i].transits[j].id);
+                LOG_TRACE("Element name: %s | UUID: %s", bim->levels[i].transits[j].name, bim->levels[i].transits[j].uuid.x);
+                LOG_TRACE("Num of outputs: %i", bim->levels[i].transits[j].numofoutputs);
+                LOG_TRACE("Width: %f", bim->levels[i].transits[j].width);
+            }
+        }
+
+        LOG_TRACE("Outside id: %u", ((bim_zone_t *)bim->zones->data[bim->zones->length-1])->id);
+        LOG_TRACE("Outside uuid: %s", ((bim_zone_t *)bim->zones->data[bim->zones->length-1])->uuid.x);
+    }
+
+    applying_scenario_bim_params(bim, bim_cfg_scenario);
+
+    // Files with results
+    char *output_detail = bim_create_file_name(filename, OUTPUT_DETAIL_FILE, OUTPUT_SUFFIX);
+    char *output_short  = bim_create_file_name(filename, OUTPUT_SHORT_FILE,  OUTPUT_SUFFIX);
+    free(filename);
+
+    FILE *fp_detail = fopen(output_detail, "w+");
+    LOG_TRACE("Created file for detailed information about flows pedestrian: %s", output_detail);
+
+    bim_output_head(bim, fp_detail);
+    bim_output_body(bim, 0, fp_detail);
+
+    bim_graph_t *graph = bim_graph_new(bim);
+    bim_graph_print(graph);
+
+    ArrayList *transits = bim->transits;
+    ArrayList *zones    = bim->zones;
+    evac_def_modeling_step(bim);
+    evac_time_reset();
+
+    double remainder = 0.0; // Количество человек, которое может остаться в зд. для остановки цикла
+    while(true)
+    {
+        evac_moving_step(graph, zones, transits);
+        evac_time_inc();
+        bim_output_body(bim, evac_get_time_m(), fp_detail);
+
+        double num_of_people = 0;
+        for (size_t i = 0; i < zones->length; i++)
+        {
+            bim_zone_t *zone = zones->data[i];
+            if (zone->is_visited)
+            {
+                num_of_people += zone->numofpeople;
+            }
+        }
+
+        if (num_of_people <= remainder) break;
+    }
+
+    LOG_INFO("Длительность эвакуации: %.2f с. (%.2f мин.)", evac_get_time_s(), evac_get_time_m());
+    LOG_INFO("Количество человек: в здании - %.2f (в безопасной зоне - %.2f) чел.", bim_tools_get_numofpeople(bim), ((bim_zone_t*)zones->data[OUTSIDE_IDX(bim)])->numofpeople);
+    LOG_INFO("---------------------------------------");
+
+    {
+        FILE *fp_short = fopen(output_short, "w+");
+        LOG_TRACE("Created file for shorted information about evacuation: %s", output_short);
+        LOG_TRACE("[Total] Time - %.2f, Number of people in the build - %.2f, Number of people in the outside - %.2f", evac_get_time_m(), bim_tools_get_numofpeople(bim), ((bim_zone_t*)zones->data[OUTSIDE_IDX(bim)])->numofpeople);
+
+        fprintf(fp_short, "%.2f,%.2f,%.2f", evac_get_time_m(), bim_tools_get_numofpeople(bim), ((bim_zone_t*)zones->data[OUTSIDE_IDX(bim)])->numofpeople);
+        fflush(fp_short);
+        fclose(fp_short);
+//            free(output_short);
+    }
+
+    fclose(fp_detail);
+//        free(output_detail);
+    bim_graph_free(graph);
+    bim_tools_free(bim);
 }
 
 void applying_scenario_bim_params(bim_t* bim, const bim_cfg_scenario_t* cfg_scenario)
