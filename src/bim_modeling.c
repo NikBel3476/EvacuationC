@@ -4,7 +4,6 @@ void applying_scenario_bim_params(bim_t* bim, const bim_cfg_scenario_t* cfg_scen
 
 modeling_result_t run_modeling(
         const char *path_to_file,
-        const char *path_to_json,
         const bim_cfg_scenario_t *bim_cfg_scenario
 ) {
     char *filename = bim_basename(path_to_file);
@@ -12,7 +11,7 @@ modeling_result_t run_modeling(
 
     // Чтение файла и разворачивание его в структуру
     LOG_TRACE("Use module `bim_json_object`. Read the file of bim and create a programming structure");
-    const bim_json_object_t * bim_json = bim_json_new(path_to_json);
+    const bim_json_object_t * bim_json = bim_json_new(path_to_file);
     {
         LOG_TRACE("Name of building: %s", bim_json->name);
 

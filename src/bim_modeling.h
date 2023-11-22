@@ -17,6 +17,6 @@ typedef struct {
     double num_of_people_in_safety_zone;
 } modeling_result_t;
 
-modeling_result_t run_modeling(const char *path_to_file, const char *path_to_json, const bim_cfg_scenario_t *bim_cfg_scenario);
+modeling_result_t run_modeling(const char *path_to_file, const bim_cfg_scenario_t *bim_cfg_scenario);
 
 #endif //EVACUATIONC_BIM_MODELING_H

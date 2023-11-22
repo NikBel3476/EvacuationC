@@ -41,7 +41,6 @@ void run_modeling_by_cfg(const cli_params_t *cli_params) {
     {
         run_modeling(
             (char *)bim_cfg_scenario->bim_jsons[bim_idx].x,
-            bim_cfg_scenario->bim_jsons[bim_idx].x,
             bim_cfg_scenario
         );
     }
