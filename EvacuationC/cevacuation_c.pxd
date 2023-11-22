@@ -19,3 +19,13 @@ cdef extern from "bim_tools.h":
 
     # Подсчитывает суммарную площадь элементов всего здания
     double bim_tools_get_area_bim(const bim_t* bim)
+
+cdef extern from "bim_scenario.h":
+    ctypedef struct bim_cfg_scenario_t *bim_cfg_scenario:
+        pass
+
+cdef extern from "bim_modeling.h":
+    ctypedef struct modeling_result_t:
+        double time_in_s
+        double num_of_evacuated_people
+        double num_of_people_in_safety_zone
