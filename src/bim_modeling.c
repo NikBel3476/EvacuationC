@@ -4,13 +4,8 @@ void applying_scenario_bim_params(bim_t* bim, const bim_cfg_scenario_t* cfg_scen
 
 modeling_result_t run_modeling(
         const char *path_to_file,
-        const char *bim_cfg_scenario_path
+        const bim_cfg_scenario_t *bim_cfg_scenario
 ) {
-    const bim_cfg_scenario_t *bim_cfg_scenario = bim_cfg_load(bim_cfg_scenario_path);
-
-    // Настройки с-logger
-    logger_configure(bim_cfg_scenario->logger_configure.x);
-
     char *filename = bim_basename(path_to_file);
     LOG_INFO("The file name of the used bim `%s.json`", filename);
 
