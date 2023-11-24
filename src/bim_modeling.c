@@ -6,6 +6,14 @@ modeling_result_t run_modeling(
         const char *path_to_file,
         const bim_cfg_scenario_t *bim_cfg_scenario
 ) {
+    printf("File path: %s\n", path_to_file);
+    if (bim_cfg_scenario == NULL) {
+        printf("CFG IS NULL!!!!");
+    }
+    printf("Logger path: %s\n", (char *)bim_cfg_scenario->logger_configure.x);
+    // Настройки с-logger
+    logger_configure(bim_cfg_scenario->logger_configure.x);
+
     char *filename = bim_basename(path_to_file);
     LOG_INFO("The file name of the used bim `%s.json`", filename);
 

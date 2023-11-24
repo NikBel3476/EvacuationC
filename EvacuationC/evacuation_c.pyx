@@ -21,4 +21,6 @@ def run_modeling(
     cdef char* path_to_file_c = path_to_file_bytes
     cdef bytes scenario_path_bytes = bim_cfg_scenario_path.encode()
     cdef char* scenario_path_c = scenario_path_bytes
-    return cevacuation_c.run_modeling(path_to_file_c, scenario_path_c)
+    cdef cevacuation_c.bim_cfg_scenario_t* bim_cfg_scenario = cevacuation_c.bim_cfg_load(scenario_path_c)
+    return cevacuation_c.run_modeling(path_to_file_c, bim_cfg_scenario)
+

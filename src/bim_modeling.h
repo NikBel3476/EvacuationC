@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "logger.h"
+#include "loggerconf.h"
 #include "bim_configure.h"
 #include "bim_output.h"
 #include "bim_tools.h"

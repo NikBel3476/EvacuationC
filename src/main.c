@@ -34,9 +34,6 @@ int main (int argc, char** argv)
 void run_modeling_by_cfg(const cli_params_t *cli_params) {
     const bim_cfg_scenario_t *bim_cfg_scenario = bim_cfg_load(cli_params->scenario_file);
 
-    // Настройки с-logger
-    logger_configure(bim_cfg_scenario->logger_configure.x);
-
     for (size_t bim_idx = 0; bim_idx < bim_cfg_scenario->num_of_bim_jsons; bim_idx++)
     {
         run_modeling(
