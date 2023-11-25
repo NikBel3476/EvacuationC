@@ -1,29 +1,8 @@
-*
+.idea/
 
-!.gitignore
-!.gitmodules
+cmake-build*/
+build/
+_skbuild/
 
-!.editorconfig
-
-!evacuationc.conf
-!LICENSE
-!logger.conf
-!scenario.json
-
-!README.md
-
-!CMakeLists.txt
-
-!src/
-!src/*
-
-!res/
-!res/*.json
-
-!thirdparty/
-!thirdparty/**/*
-
-!test/
-!test/*.c
-!test/*.h
-!test/CMakeLists.txt
+evacuation_c.c
+*.egg-info
