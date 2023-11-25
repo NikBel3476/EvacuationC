@@ -70,6 +70,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(c-logger json-c)
 
 if (SKBUILD)
+    if (CMAKE_COMPILER_IS_GNUCC)
+        target_compile_options(logger_static PUBLIC "-fPIC")
+    endif()
     add_subdirectory(EvacuationC)
 else()
     add_executable(${PROJECT_NAME}
