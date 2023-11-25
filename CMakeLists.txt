@@ -9,16 +9,17 @@ project(EvacuationC
 
 set(CMAKE_PROJECT_INCLUDE_BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Policy.cmake)
 
-include(ExternalProject)
 include(FetchContent)
 include(CTest)
 
 option(build_tests "Build all of own tests" OFF)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 if (MSVC)
     set(CMAKE_C_FLAGS "/Wall")
+    set(CMAKE_C_FLAGS_RELEASE "/O2")
 else()
     set(CMAKE_C_FLAGS "-std=gnu11 -W -Wall -Wextra -Wparentheses -Wshadow -funsigned-char")
     set(CMAKE_C_FLAGS_DEBUG "-g -O0")
@@ -41,6 +42,7 @@ set(SOURCES_LIB
     src/bim_json_object.c   src/bim_json_object.h
     src/bim_uuid.h
     src/bim_output.c        src/bim_output.h
+    src/bim_modeling.c      src/bim_modeling.h
 )
 
 add_library(${PROJECT_LIB_STATIC}
@@ -56,7 +58,7 @@ add_library(${PROJECT_LIB_SHARED}
 FetchContent_Declare(
     c-logger
     GIT_REPOSITORY https://github.com/NikBel3476/c-logger.git
-    GIT_TAG f02747287296b5a0da1cc2b9d7f4e98a3be444d9 # upstream/master
+    GIT_TAG 0a2f68ad4a0585cefa58fcafd9ac1716b8c74674 # upstream/master
 )
 
 FetchContent_Declare(
@@ -68,14 +70,26 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(c-logger json-c)
 
 if (SKBUILD)
-    find_package(PythonExtensions REQUIRED)
-    find_package(Cython REQUIRED)
+    if (CMAKE_COMPILER_IS_GNUCC)
+        target_compile_options(logger_static PUBLIC "-fPIC")
+    endif()
     add_subdirectory(EvacuationC)
 else()
     add_executable(${PROJECT_NAME}
             src/main.c
             src/bim_cli.c src/bim_cli.h
     )
+
+    target_link_libraries(${PROJECT_NAME}
+            PRIVATE
+            ${PROJECT_LIB_STATIC}
+    )
+
+    ### Test
+    #if(build_tests AND ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+        enable_testing()
+        add_subdirectory(tests)
+    #endif()
 endif()
 
 target_include_directories(${PROJECT_LIB_STATIC}
@@ -97,20 +111,9 @@ target_link_libraries(${PROJECT_LIB_STATIC}
 
 target_link_libraries(${PROJECT_LIB_SHARED}
     PUBLIC
-        logger_static
+        logger
         arraylist
-        json-c-static
-)
-
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-        ${PROJECT_LIB_STATIC}
+        json-c
 )
 
 add_subdirectory(thirdparty/arraylist)
-
-### Test
-#if(build_tests AND ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-    enable_testing()
-    add_subdirectory(tests)
-#endif()

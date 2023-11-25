@@ -18,6 +18,7 @@
 
 const bim_cfg_scenario_t*   bim_cfg_load    (const char *filename)
 {
+    printf("Cfg path: %s\n", filename);
     json_object *root = NULL;
     bim_cfg_scenario_t *cfg_scenarion = NULL;
 
